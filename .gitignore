@@ -1,0 +1,9 @@
+# Игнорировать системные файлы VS Code
+.vscode/
+.env
+
+#Игнорировать кеш
+__pycache__/
+.pytest_cache/
+prompts/__pycache__/
+tests/__pycache__/

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Context</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <div class="sidebar">
+            <h2>Set Context</h2>
+            <form id="context-form">
+                <div>
+                    <label>Company size by portfolio:</label><br>
+                    <input type="radio" name="company_size" value="Large"> Large<br>
+                    <input type="radio" name="company_size" value="Medium"> Medium<br>
+                    <input type="radio" name="company_size" value="Small"> Small<br>
+                </div>
+                <div>
+                    <label>Scope of typical project:</label><br>
+                    <input type="checkbox" name="scope" value="Hardware"> Hardware<br>
+                    <input type="checkbox" name="scope" value="Custom Software Development"> Custom Software Development<br>
+                    <input type="checkbox" name="scope" value="Software Integration"> Software Integration<br>
+                    <input type="checkbox" name="scope" value="Consulting"> Consulting<br>
+                </div>
+                <div>
+                    <label>Customers:</label><br>
+                    <input type="checkbox" name="customers" value="IT"> IT<br>
+                    <input type="checkbox" name="customers" value="Retail & Logistic"> Retail & Logistic<br>
+                    <input type="checkbox" name="customers" value="Process Industries"> Process Industries<br>
+                    <input type="checkbox" name="customers" value="Batch Production"> Batch Production<br>
+                    <input type="checkbox" name="customers" value="Discrete Manufacturing"> Discrete Manufacturing<br>
+                    <input type="checkbox" name="customers" value="Utilities"> Utilities<br>
+                </div>
+                <div>
+                    <label>Your department:</label><br>
+                    <input type="radio" name="department" value="Operations"> Operations<br>
+                    <input type="radio" name="department" value="Project Management"> Project Management<br>
+                    <input type="radio" name="department" value="Finance"> Finance<br>
+                    <input type="radio" name="department" value="Product"> Product<br>
+                </div>
+                <div>
+                    <label>Stage of your company's life cycle:</label><br>
+                    <input type="radio" name="lifecycle" value="Startup"> Startup<br>
+                    <input type="radio" name="lifecycle" value="Grow"> Grow<br>
+                    <input type="radio" name="lifecycle" value="Plato"> Plato<br>
+                    <input type="radio" name="lifecycle" value="Decline"> Decline<br>
+                </div>
+                <div>
+                    <label>Your goal:</label><br>
+                    <input type="radio" name="goal" value="Performance Increasement"> Performance Increasement<br>
+                    <input type="radio" name="goal" value="Risk Analysis"> Risk Analysis<br>
+                    <input type="radio" name="goal" value="Start New Service or Product"> Start New Service or Product<br>
+                </div>
+                <div>
+                    <label>Your market:</label><br>
+                    <input type="radio" name="market" value="Country"> Country<br>
+                    <input type="radio" name="market" value="Region"> Region<br>
+                    <input type="radio" name="market" value="Worldwide"> Worldwide<br>
+                </div>
+                <button type="button" onclick="saveContext()">Save Context</button>
+            </form>
+            <div id="context-status"></div> <!-- Сообщение о статусе контекста -->
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-box" id="chat-box"></div>
+
+            <textarea id="message-input" placeholder="Type your message..."></textarea>
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        var socket = io();
+        var roomId = generateRoomId();
+
+        function renderMath() {
+            MathJax.typeset();
+        }
+        
+        function generateRoomId() {
+            return 'room_' + Math.random().toString(36).substring(2, 9);
+        }
+        
+        function saveContext() {
+            var formData = new FormData(document.getElementById('context-form'));
+            var context = {};
+            
+            var fields = ['company_size', 'scope', 'customers', 'department', 'lifecycle', 'goal', 'market'];
+            fields.forEach((field) => {
+                var values = formData.getAll(field);
+                context[field] = values.length > 0 ? values : "";
+            });
+
+            context["user_id"] = roomId;
+            socket.emit('join_room', { room: roomId });
+
+            socket.on('room_joined', (data) => {
+                fetch('/save_context', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(context)
+                }).then(response => response.json()).then(data => {
+                    document.getElementById('context-status').textContent = "Context saved and room joined successfully!";
+                }).catch(error => {
+                    document.getElementById('context-status').textContent = "Error saving context!";
+                    console.error('Error:', error);
+                });
+            });
+        }
+        
+        function sendMessage() {
+            var message = document.getElementById('message-input').value;
+            if (message.trim() === "" || roomId === null) return;
+        
+            var chatBox = document.getElementById('chat-box');
+            var userMessageElement = document.createElement('div');
+            userMessageElement.className = 'message user-message';
+            
+            userMessageElement.innerHTML = marked.parse("You: " + message);
+            chatBox.appendChild(userMessageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            renderMath();
+
+            socket.emit('message', { user_id: roomId, msg: message });
+            document.getElementById('message-input').value = '';
+        }
+        
+        socket.on('message', function(data) {
+            if (data.room === roomId) {
+                var chatBox = document.getElementById('chat-box');
+                var responseElement = document.createElement('div');
+                responseElement.className = 'message response';
+                
+                responseElement.innerHTML = marked.parse("Bot: " + data.msg);
+                chatBox.appendChild(responseElement);
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                renderMath();
+            }
+        });
+        
+        socket.on('room_joined', function(data) {
+            if (data.room === roomId) {
+                console.log('Joined room:', roomId);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+Flask
+Flask-SocketIO
+flask-testing
+pytest
+pytest-flask
+pytest-mock
+openai==0.28
+python-dotenv
+coverage
