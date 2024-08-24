@@ -7,11 +7,15 @@ WORKDIR /app
 # Копируем файл зависимостей в контейнер
 COPY requirements.txt .
 
-# Устанавливаем зависимости
-RUN pip install --no-cache-dir -r requirements.txt
+# Создаем виртуальное окружение и активируем его
+RUN python -m venv /venv
 
-# Копируем все необходимые файлы, а лишнее отфильтруем в dockerignore
+# Устанавливаем pip и устанавливаем зависимости внутри виртуального окружения
+RUN /venv/bin/pip install --upgrade pip && \
+    /venv/bin/pip install --no-cache-dir -r requirements.txt
+
+# Копируем остальные файлы проекта
 COPY . .
 
 # Указываем команду для запуска вашего приложения
-CMD ["python", "app.py"]
+CMD ["/venv/bin/python", "app.py"]
