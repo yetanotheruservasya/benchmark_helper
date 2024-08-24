@@ -30,7 +30,7 @@ jobs:
 
     - name: Run tests and check coverage
       run: |
-        coverage run -m pytest tests/test_app.py -v --maxfail=3 --disable-warnings
+        coverage run -m pytest tests/test_app.py -v --maxfail=1 --disable-warnings
         coverage report
         coverage html
         # Опционально: сохраните отчет о покрытии как артефакт
@@ -44,3 +44,32 @@ jobs:
       with:
         name: coverage-report
         path: coverage_report
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: false
+        tags: yetanotheruservasya/main:latest
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Run Docker container
+      run: |
+        docker run -d -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} -p 5000:5000 yetanotheruservasya/main:latest
+
+    - name: Test application
+      run: |
+        sleep 10  # Даем время контейнеру запуститься
+        response=$(curl --write-out "%{http_code}" --silent --output /dev/null http://localhost:5000/)
+        if [ "$response" -ne 200 ]; then
+          echo "Error: Expected HTTP 200 but got HTTP $response"
+          exit 1
+        fi
