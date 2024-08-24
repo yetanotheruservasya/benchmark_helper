@@ -3,6 +3,7 @@
 ![JavaScript](https://img.shields.io/badge/Language-JavaScript-yellow)
 ![CSS](https://img.shields.io/badge/Language-CSS-blue)
 ![HTML](https://img.shields.io/badge/Language-HTML-orange)
+![Docker](https://img.shields.io/docker/v/USERNAME/IMAGE_NAME?label=version)
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/yetanotheruservasya/benchmark_helper/app.yml?branch=main)
 ![Contributors](https://img.shields.io/github/contributors/yetanotheruservasya/benchmark_helper)
