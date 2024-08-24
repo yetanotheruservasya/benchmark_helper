@@ -6,7 +6,7 @@
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/yetanotheruservasya/benchmark_helper/app.yml?branch=main)
 ![Contributors](https://img.shields.io/github/contributors/yetanotheruservasya/benchmark_helper)
-
+ 
 ## Описание
 
 Benchmark Helper — is a project designed to analyze and evaluate operational performance. This project includes Python scripts and web resources for data visualization and management, which allows you to effectively compare and analyze various operational indicators.
