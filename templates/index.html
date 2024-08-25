@@ -8,8 +8,13 @@
 </head>
 <body>
 
+    <div class="header">
+        <button id="toggle-sidebar">☰</button>
+        <span id="context-status"></span> <!-- Сообщение о статусе контекста -->
+    </div>
+
     <div class="container">
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <h2>Set Context</h2>
             <form id="context-form">
                 <div>
@@ -62,7 +67,6 @@
                 </div>
                 <button type="button" onclick="saveContext()">Save Context</button>
             </form>
-            <div id="context-status"></div> <!-- Сообщение о статусе контекста -->
         </div>
 
         <div class="chat-container">
@@ -152,6 +156,19 @@
         socket.on('room_joined', function(data) {
             if (data.room === roomId) {
                 console.log('Joined room:', roomId);
+            }
+        });
+
+        document.getElementById('toggle-sidebar').addEventListener('click', function() {
+            var sidebar = document.getElementById('sidebar');
+            var button = document.getElementById('toggle-sidebar');
+            
+            if (sidebar.style.display === 'none') {
+                sidebar.style.display = 'block';
+                button.textContent = '☰';
+            } else {
+                sidebar.style.display = 'none';
+                button.textContent = '☰';
             }
         });
     </script>
