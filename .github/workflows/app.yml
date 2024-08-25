@@ -6,7 +6,9 @@ on:
       - main 
     paths:
     - 'templates/**'
+    - 'static/**'
     - 'app.py'
+    - 'app.yml'
   pull_request:
     branches: [ main ]
 
