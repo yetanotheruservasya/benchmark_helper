@@ -1,3 +1,4 @@
+import eventlet
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import send, SocketIO, join_room, leave_room
 from dotenv import load_dotenv
@@ -11,7 +12,7 @@ from prompts.prompt_generator import *  # Импортируем всё
 secret_key = secrets.token_hex(16)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = secret_key
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode='eventlet')
 
 # Загрузите переменные окружения из .env файла
 load_dotenv()
@@ -143,4 +144,4 @@ def handle_join_room(data):
         socketio.emit('error_message', {"msg": "Error: Room ID is required"}, room=None)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)

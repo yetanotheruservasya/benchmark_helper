@@ -7,3 +7,4 @@ __pycache__/
 .pytest_cache/
 prompts/__pycache__/
 tests/__pycache__/
+room*
